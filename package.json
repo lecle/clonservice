@@ -1,6 +1,6 @@
 {
-  "name": "cronsservice",
-  "version": "0.0.1",
+  "name": "cronservice",
+  "version": "0.0.2",
   "description": "cron microservice",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kangchals/cronservice.git"
+    "url": "git+https://github.com/kangchals/cronservice.git"
   },
   "keywords": [
     "microservice,noserv,cron"
@@ -27,8 +27,14 @@
     "assert": "~1.2.0",
     "async": "^0.9.0",
     "istanbul": "^0.3.5",
-    "lodash": "^3.1.0",
     "mocha": "~2.0.1",
-    "restify": "^3.0.3"
-  }
+    "observ-fs" : "^1.6.0",
+    "cron" : "^1.0.9"
+  },
+  "gitHead": "59f7fe0aa5c824ee9a3e9055157a115b8856c9e0",
+  "readme": "ERROR: No README data found!",
+  "_id": "cronservice@0.0.1",
+  "_shasum": "59749e208eb5b6169aa24c27311231e62484d971",
+  "_from": "git://github.com/kangchals/cronservice.git",
+  "_resolved": "git://github.com/kangchals/cronservice.git#59f7fe0aa5c824ee9a3e9055157a115b8856c9e0"
 }
