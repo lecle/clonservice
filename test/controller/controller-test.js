@@ -1,6 +1,4 @@
-/**
- * Created by LecleNote1 on 2015-07-20.
- */
+"use strict";
 var cronJob = require('../../lib/controllers/cronJob');
 var container = require('../../../../lib/container').getInstance();
 var assert = require('assert');
@@ -11,6 +9,7 @@ describe('controlller', function(){
     before(function(done) {
 
         container.init('', '', function (err) {
+
             console.log('!! You should manually drop dayAnalysis collection at ANALYTICSDB');
             console.log('!! You should manually comment out functions in init function');
             setTimeout(done, 1000);
@@ -48,21 +47,23 @@ describe('controlller', function(){
                     if(asnc === null){  done(); }
                 }
 
-                cronJob.getAppListTest( myCallback , mongo);
+                cronJob.getAppListTest(mongo, myCallback);
             });
         });
 
         it('should run getMinCreateTime() without error', function(done){
 
-            this.timeout(4000);
+            this.timeout(6000);
 
             container.getService('MONGODB').then(function (mongo){
 
                 var myCallback = function a(asnc, data){
+
+                    assert.equal(testData['554c69e0673c42e411ea533b'] , data['554c69e0673c42e411ea533b'], 'Both of them should be same');
                     resultData = data;
                     if(asnc === null){  done(); }
-                }
-                cronJob.getMinCreateTimeTest( myCallback , applist, mongo);
+                };
+                cronJob.getMinCreateTimeTest(applist, mongo, myCallback);
             });
         });
 
@@ -85,63 +86,64 @@ describe('controlller', function(){
 
                                 if(asnc === null){
 
-                                    assert.equal( docs.data, 133, 'It should be 133 for now. ' +
+                                    assert.notEqual( docs.data.length, 0, 'It should not be 0 all the time.  ' +
                                     'If sample data changed, you should change the 133 number accordingly');
                                     done();
                                 }
                             });
-
                         },7000);
-                    }
-                    cronJob.getCronResultTest( myCallback , resultData, mongo, analyMongo);
+                    };
+                    cronJob.getCronResultTest(resultData, mongo, analyMongo, myCallback);
                 });
             });
         });
 
 
-        it('should runregistCronJob() without error when resCB.prototype.type is file ', function(done){
+        it('should runregistCronJob() without error when resCB.type is file ', function(done){
 
-            container.getService('MONGODB').then(function (mongo){
+            var fileCB = function a(){
 
-                var myCallback = function a(job){
+                return {
+                    type : 'file',
+                    callback: function(job){
 
-                    if(job){
+                        if(job){
 
-                        assert.equal( job.running, true, 'it should be true');
-                        done();
+                            assert.equal( job.running, true, 'it should be true');
+                            done();
+                        }
                     }
-                }
-                myCallback.prototype.type = 'file';
-
-                console.log('/noserv-cron-server/crons/job1.js should exist');
-                cronJob.registCronJobTest( 'job1.js' ,myCallback);
-            });
+                };
+            };
+            console.log('/noserv-cron-server/crons/job1.js should exist');
+            cronJob.registCronJobTest('job1.js' ,fileCB);
         });
 
-        it('should runregistCronJob() without error when resCB.prototype.type is query ', function(done){
-            container.getService('MONGODB').then(function (mongo){
+        it('should runregistCronJob() without error when resCB.type is query ', function(done){
 
-                var myCallback = function a(job){
+            var quertyCB = function a(){
 
-                    if(job){
+                return{
+                    type : 'query',
+                    cronInfo : {
+                        cronTime : new Function("return '03 * * * * 0-6';"),
+                        startRightaway : new Function('return true'),
+                        cronFunction : new Function("console.log('!!!! job3 !!!!! ' + new Date());")
+                    },
+                    callback : function(job){
 
-                        assert.strictEqual( job.running, true, 'it should be true');
-                        done();
+                        if(job){
+
+                            assert.strictEqual( job.running, true, 'it should be true');
+                            done();
+                        }
                     }
                 }
-
-                myCallback.prototype.type = 'query';
-                myCallback.prototype.cronInfo = {};
-
-                myCallback.prototype.cronInfo.cronTime = new Function("return '03 * * * * 0-6';");
-                myCallback.prototype.cronInfo.startRightaway =  new Function('return true');
-                myCallback.prototype.cronInfo.cronFunction =  new Function("console.log('!!!! job3 !!!!! ' + new Date());");
-
-                cronJob.registCronJobTest('test2.js', myCallback);
-            });
+            };
+            cronJob.registCronJobTest('test2.js', quertyCB);
         });
 
-        it('should runMainCronJob() without error when resCB.prototype.type is query ', function(done){
+        it('should runMainCronJob() without error ', function(done){
 
             cronJob.runMainCronJob();
             setTimeout(function(){
@@ -150,7 +152,7 @@ describe('controlller', function(){
             }, 1000);
         });
 
-        it('should runCronFileJob() without error when resCB.prototype.type is query ', function(done){
+        it('should runCronFileJob() without error when resCB.type is query ', function(done){
             fs.readdir('./crons', function(err,files){
 
                 if( files.length ){
@@ -163,7 +165,7 @@ describe('controlller', function(){
             });
         });
 
-        it('should runCronFileObserver() without error when resCB.prototype.type is query ', function(done){
+        it('should runCronFileObserver() without error ', function(done){
 
             cronJob.runCronFileObserver();
             setTimeout(function(){
